@@ -3,7 +3,7 @@ import { LayoutDashboard, Users, CalendarCheck, Settings } from "lucide-react";
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-[#115e3b] text-white flex-col hidden md:flex">
+    <aside className="w-64 bg-[#115e3b] text-white flex-col h-full hidden md:flex">
       <div className="h-16 flex items-center px-6 border-b border-emerald-800">
         <h1 className="text-xl font-bold">Madrasah<span className="text-emerald-300">Portal</span></h1>
       </div>
