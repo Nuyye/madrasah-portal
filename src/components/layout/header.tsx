@@ -1,67 +1,68 @@
-import { Bell, Search, Menu, LayoutDashboard, CalendarCheck, Users } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { Bell, ChevronDown, CalendarDays } from "lucide-react";
 
 export default function Header() {
-  return (
-    <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30">
-      
-      {/* Bagian Kiri (Hamburger Menu HP & Search) */}
-      <div className="flex items-center gap-4">
-        
-        {/* Hamburger Menu (CUMA MUNCUL DI HP) */}
-        <Sheet>
-          <SheetTrigger className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md">
-            <Menu className="h-6 w-6" />
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0 bg-[#0d4a2e] border-r-0">
-            <SheetHeader className="sr-only">
-              <SheetTitle>Menu Navigasi</SheetTitle>
-            </SheetHeader>
-            {/* Isi Navigasi HP (Sama kayak Sidebar) */}
-            <div className="h-full flex flex-col text-white">
-              <div className="h-16 flex items-center px-6 border-b border-emerald-800/50 font-extrabold text-xl tracking-tight">
-                Madrasah<span className="text-amber-400">Portal</span>
-              </div>
-              <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                <Link href="/portal" className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-emerald-800 transition-colors">
-                  <LayoutDashboard className="h-5 w-5" /> Dashboard Utama
-                </Link>
-                <div className="pt-4 pb-2">
-                  <p className="px-3 text-xs font-semibold text-emerald-300/70 uppercase tracking-wider">Modul Madrasah</p>
-                </div>
-                <Link href="/portal/absensi" className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-bold hover:bg-emerald-800 transition-colors">
-                  <CalendarCheck className="h-5 w-5" /> Rekap Absensi
-                </Link>
-                <Link href="/portal/siswa" className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-emerald-800 transition-colors">
-                  <Users className="h-5 w-5" /> Data Siswa
-                </Link>
-              </nav>
-            </div>
-          </SheetContent>
-        </Sheet>
+  // Logic auto-generate Tahun Ajaran (Biar lo nggak usah input manual tiap tahun)
+  // Ngambil tahun sekarang (misal 2026), terus bikin list dari 2 tahun lalu sampai 5 tahun ke depan
+  const currentYear = new Date().getFullYear();
+  const generateTahunAjaran = () => {
+    const list: string[] = [];
+    for (let i = currentYear - 2; i <= currentYear + 5; i++) {
+      list.push(`${i}/${i + 1}`);
+    }
+    return list;
+  };
 
-        {/* Search Bar (Cuma Muncul di Layar Gede) */}
-        <div className="hidden md:flex items-center relative w-64">
-          <Search className="absolute left-2.5 h-4 w-4 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Cari siswa atau kelas..." 
-            className="w-full pl-9 pr-4 py-2 bg-slate-100 border-transparent rounded-full text-sm focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all" 
-          />
+  const listTahunAjaran = generateTahunAjaran();
+  
+  // State default kita set ke tahun sekarang
+  const [activeTahunAjaran, setActiveTahunAjaran] = useState(`${currentYear}/${currentYear + 1}`);
+
+  return (
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm sticky top-0 z-30">
+      
+      {/* Kiri: Dropdown Tahun Ajaran (Global Context) */}
+      <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2 bg-emerald-50 text-[#115e3b] px-3 py-1.5 rounded-lg border border-emerald-100">
+          <CalendarDays className="h-4 w-4" />
+          <span className="text-sm font-bold">Tahun Ajaran:</span>
+        </div>
+        <div className="relative">
+          <select 
+            value={activeTahunAjaran}
+            onChange={(e) => setActiveTahunAjaran(e.target.value)}
+            className="appearance-none bg-slate-50 border border-slate-200 text-slate-800 text-sm font-extrabold rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#115e3b] cursor-pointer"
+          >
+            {listTahunAjaran.map((tahun) => (
+              <option key={tahun} value={tahun}>{tahun}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
         </div>
       </div>
 
-      {/* Bagian Kanan (Notif & Profile) */}
-      <div className="flex items-center gap-3 md:gap-4">
-         <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-         </button>
-         <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-emerald-600 border-2 border-emerald-100 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+      {/* Kanan: Profil & Notifikasi */}
+      <div className="flex items-center gap-4">
+        <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors">
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full border border-white"></span>
+        </button>
+        
+        <div className="h-8 w-px bg-slate-200 mx-1"></div>
+        
+        <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-bold text-slate-700">Ibnu Athoillah</p>
+            <p className="text-xs font-medium text-slate-500">Admin Tata Usaha</p>
+          </div>
+          <div className="h-9 w-9 rounded-full bg-[#115e3b] text-white flex items-center justify-center font-bold shadow-sm">
             IA
-         </div>
+          </div>
+        </div>
       </div>
+      
     </header>
   );
 }
