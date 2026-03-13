@@ -32,7 +32,7 @@ export default function DataSiswaPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newStudent, setNewStudent] = useState({ nis: "", name: "", className: "10-IPA-1" });
 
-  const classOptions = ["Semua", "10-IPA-1", "10-IPA-2", "10-IPS-1", "11-IPA-1", "11-IPS-1"];
+  const classOptions = ["Semua", "VII A", "VII B", "VII C", "VII D", "VIII A", "VIII B", "VIII C", "VIII D", "IX A", "IX B", "IX C", "IX D"];
   const inputClassOptions = classOptions.filter(c => c !== "Semua"); // Buat form input nggak ada opsi "Semua"
 
   const filteredStudents = useMemo(() => {
