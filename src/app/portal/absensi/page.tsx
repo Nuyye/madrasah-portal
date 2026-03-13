@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Save, AlertCircle } from "lucide-react";
+import { MadrasahAPI } from "@/src/lib/api";
 
 // Data dummy siswa untuk testing UI
 const initialStudents = [
@@ -37,9 +38,30 @@ export default function RekapAbsensiPage() {
     );
   };
 
-  const handleSimpan = () => {
+  const handleSimpan = async () => {
+  // Kita racik dulu datanya biar yang dikirim ke Back-End udah mateng
+  const payload = students.map((student) => {
+    const konversiBolos = hitungKonversiBolos(student.bolos);
+    return {
+      nis: student.nis,
+      nama: student.name,
+      sakit: student.s,
+      izin: student.i,
+      alpha_awal: student.a,
+      bolos: student.bolos,
+      total_alpha_akhir: student.a + konversiBolos, // Ini angka matengnya!
+    };
+  });
+
+  try {
+    // Panggil API kita
+    await MadrasahAPI.submitRekapAbsensi(payload);
     alert("Data rekapitulasi kehadiran berhasil disimpan ke dalam sistem.");
-  };
+  } catch (error) {
+  console.error(error); // Tampilkan detail error di console browser
+  alert("Waduh, koneksi ke server gagal bro!");
+}
+};
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

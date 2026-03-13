@@ -37,5 +37,25 @@ export const MadrasahAPI = {
     // Simulasi pengiriman data
     console.log(`[API MOCK] Memindahkan ${studentIds.length} siswa ke kelas ${targetClass}`);
     return { success: true };
-  }
+  },
+
+  // 4. Fungsi khusus buat ngirim data REKAP BULANAN mateng (lengkap sama hasil konversi)
+  submitRekapAbsensi: async (dataRekap: Record<string, string | number>[]) => {
+    /* NANTI TEMEN LO TINGGAL UNCOMMENT CODE INI:
+      const response = await fetch(`${API_URL}/rekap-absensi`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rekap: dataRekap })
+      });
+      return response.json();
+    */
+    
+    // Simulasi API jalan
+    console.log("[API MOCK] Mengirim payload rekap ke server:", dataRekap);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true, message: "Rekapitulasi tersimpan!" });
+      }, 1000);
+    });
+  },
 };
