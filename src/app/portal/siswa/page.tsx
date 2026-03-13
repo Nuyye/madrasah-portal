@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Filter, ArrowRightLeft, Users, CheckSquare } from "lucide-react";
+import { Search, Filter, ArrowRightLeft, Users, CheckSquare, Plus, X } from "lucide-react";
 import { MadrasahAPI } from "@/src/lib/api";
 
-// Bikin cetakan tipe data biar TypeScript nggak ngomel
 interface Student {
   id: string;
   nis: string;
@@ -12,7 +11,6 @@ interface Student {
   className: string;
 }
 
-// Data dummy awal
 const initialData: Student[] = [
   { id: "1", nis: "1011", name: "Ahmad Fauzi", className: "10-IPA-1" },
   { id: "2", nis: "1012", name: "Budi Santoso", className: "10-IPA-1" },
@@ -26,15 +24,17 @@ export default function DataSiswaPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClassFilter, setSelectedClassFilter] = useState("Semua");
   
-  // State buat Checkbox & Pindah Kelas
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [targetClass, setTargetClass] = useState("");
   const [isMoving, setIsMoving] = useState(false);
 
-  // Daftar unik kelas untuk dropdown filter
-  const classOptions = ["Semua", "10-IPA-1", "10-IPA-2", "10-IPS-1", "11-IPA-1", "11-IPS-1"];
+  // State khusus buat Modal Tambah Siswa
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newStudent, setNewStudent] = useState({ nis: "", name: "", className: "10-IPA-1" });
 
-  // Logika Filter & Search (Otomatis update tabel tanpa tombol cari)
+  const classOptions = ["Semua", "10-IPA-1", "10-IPA-2", "10-IPS-1", "11-IPA-1", "11-IPS-1"];
+  const inputClassOptions = classOptions.filter(c => c !== "Semua"); // Buat form input nggak ada opsi "Semua"
+
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
       const matchSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -44,12 +44,11 @@ export default function DataSiswaPage() {
     });
   }, [students, searchQuery, selectedClassFilter]);
 
-  // Handler Checkbox
   const handleSelectAll = () => {
     if (selectedIds.length === filteredStudents.length) {
-      setSelectedIds([]); // Uncheck semua
+      setSelectedIds([]);
     } else {
-      setSelectedIds(filteredStudents.map(s => s.id)); // Check semua yg ada di layar
+      setSelectedIds(filteredStudents.map(s => s.id));
     }
   };
 
@@ -61,24 +60,19 @@ export default function DataSiswaPage() {
     }
   };
 
-  // Handler Action Pindah Kelas
   const handleBulkMove = async () => {
     if (selectedIds.length === 0) return alert("Pilih minimal 1 siswa dulu bro!");
     if (!targetClass) return alert("Pilih kelas tujuan dulu bro!");
     
     setIsMoving(true);
     try {
-      // Panggil API yang udah lo bikin
       await MadrasahAPI.bulkMoveClass(selectedIds, targetClass);
-      
-      // Update UI Tabel
       setStudents(prev => prev.map(student => 
         selectedIds.includes(student.id) ? { ...student, className: targetClass } : student
       ));
-      
       alert(`Berhasil memindahkan ${selectedIds.length} siswa ke kelas ${targetClass}`);
-      setSelectedIds([]); // Kosongin centang setelah berhasil
-      setTargetClass(""); // Reset dropdown tujuan
+      setSelectedIds([]);
+      setTargetClass("");
     } catch (error) {
       console.error(error);
       alert("Gagal memindahkan siswa. Cek koneksi server!");
@@ -87,24 +81,52 @@ export default function DataSiswaPage() {
     }
   };
 
+  // Fungsi Action Tambah Siswa Baru
+  const handleAddStudent = (e: React.FormEvent) => {
+    e.preventDefault(); // Biar halaman nggak me-refresh
+    
+    if (!newStudent.nis || !newStudent.name) {
+      return alert("NIS dan Nama wajib diisi bro!");
+    }
+
+    // Bikin ID unik ala kadarnya buat prototype
+    const newId = Math.random().toString(36).substr(2, 9);
+    
+    // Tambahin data baru ke daftar yang udah ada
+    setStudents([...students, { id: newId, ...newStudent }]);
+    
+    // Reset form dan tutup modal
+    setNewStudent({ nis: "", name: "", className: "10-IPA-1" });
+    setIsModalOpen(false);
+    alert("Siswa baru berhasil ditambahkan!");
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       
       {/* Header & Title */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-3">
           <div className="bg-emerald-100 p-2 rounded-lg text-[#115e3b]">
             <Users className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-800">Master Data Siswa</h1>
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-800">Master Data Siswa</h1>
+            <p className="text-slate-500 font-medium mt-1">Kelola database siswa dan mutasi kelas.</p>
+          </div>
         </div>
-        <p className="text-slate-500 font-medium">Kelola database siswa dan mutasi pindah kelas secara massal.</p>
+        
+        {/* Tombol Buka Modal */}
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-[#115e3b] hover:bg-[#0d4a2e] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm"
+        >
+          <Plus className="h-5 w-5" /> Tambah Siswa
+        </button>
       </div>
 
       {/* Toolbar: Search, Filter & Action Area */}
       <div className="flex flex-col lg:flex-row justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        
-        {/* Kiri: Search & Filter */}
         <div className="flex flex-col sm:flex-row gap-3 flex-1">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -128,7 +150,6 @@ export default function DataSiswaPage() {
           </div>
         </div>
 
-        {/* Kanan: Bulk Action Move Class */}
         <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
           <span className="text-sm font-bold text-slate-600 px-2 flex items-center gap-2">
             <CheckSquare className="h-4 w-4" /> {selectedIds.length} Terpilih
@@ -139,7 +160,7 @@ export default function DataSiswaPage() {
             className="px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none cursor-pointer"
           >
             <option value="">-- Pilih Kelas Tujuan --</option>
-            {classOptions.filter(o => o !== "Semua").map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            {inputClassOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
           <button 
             onClick={handleBulkMove}
@@ -202,6 +223,75 @@ export default function DataSiswaPage() {
           </table>
         </div>
       </div>
+
+      {/* MODAL / POP-UP TAMBAH SISWA */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <h2 className="text-lg font-extrabold text-slate-800">Tambah Peserta Didik Baru</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body / Form */}
+            <form onSubmit={handleAddStudent} className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Nomor Induk Siswa (NIS)</label>
+                <input 
+                  type="text" 
+                  value={newStudent.nis}
+                  onChange={(e) => setNewStudent({...newStudent, nis: e.target.value})}
+                  placeholder="Contoh: 1016"
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#115e3b] outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                <input 
+                  type="text" 
+                  value={newStudent.name}
+                  onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
+                  placeholder="Masukkan nama lengkap..."
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#115e3b] outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Penempatan Kelas</label>
+                <select 
+                  value={newStudent.className}
+                  onChange={(e) => setNewStudent({...newStudent, className: e.target.value})}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#115e3b] outline-none bg-white cursor-pointer"
+                >
+                  {inputClassOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
+
+              {/* Modal Footer / Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit"
+                  className="px-5 py-2.5 text-sm font-bold text-white bg-[#115e3b] hover:bg-[#0d4a2e] rounded-xl transition-colors shadow-sm"
+                >
+                  Simpan Data
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
