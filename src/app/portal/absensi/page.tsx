@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Save, AlertCircle, CalendarDays, Printer } from "lucide-react";
+import Image from "next/image";
 import { MadrasahAPI } from "@/src/lib/api";
 
 const initialStudents = [
@@ -148,7 +149,7 @@ export default function RekapAbsensiPage() {
             {/* Tempat Logo (Lo bisa masukin gambar logo sekolah lo ke folder public/logo.png nanti) */}
             <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center border border-black rounded-full overflow-hidden">
                 {/* <img src="/logo.png" className="w-full h-full object-cover" /> */}
-                <span className="text-[10px] text-center font-bold">LOGO<br/>SEKOLAH</span>
+               <Image src="/public/assets/logo1.png" alt="Logo Madrasah" width={96} height={96} className="object-contain" />
             </div>
             
             <div className="text-center flex-1 px-4 leading-snug">
