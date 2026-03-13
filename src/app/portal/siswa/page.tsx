@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Filter, ArrowRightLeft, Users, CheckSquare, Plus, X } from "lucide-react";
+import { Search, Filter, ArrowRightLeft, Users, CheckSquare, Plus, X, Edit, Trash2 } from "lucide-react";
 import { MadrasahAPI } from "@/src/lib/api";
 
 interface Student {
@@ -12,11 +12,11 @@ interface Student {
 }
 
 const initialData: Student[] = [
-  { id: "1", nis: "1011", name: "Ahmad Fauzi", className: "10-IPA-1" },
-  { id: "2", nis: "1012", name: "Budi Santoso", className: "10-IPA-1" },
-  { id: "3", nis: "1013", name: "Citra Lestari", className: "10-IPA-2" },
-  { id: "4", nis: "1014", name: "Dewi Anggraini", className: "10-IPS-1" },
-  { id: "5", nis: "1015", name: "Eko Prasetyo", className: "10-IPS-1" },
+  { id: "1", nis: "1011", name: "Ahmad Fauzi", className: "VII A" },
+  { id: "2", nis: "1012", name: "Budi Santoso", className: "VII B" },
+  { id: "3", nis: "1013", name: "Citra Lestari", className: "VIII A" },
+  { id: "4", nis: "1014", name: "Dewi Anggraini", className: "VIII C" },
+  { id: "5", nis: "1015", name: "Eko Prasetyo", className: "IX D" },
 ];
 
 export default function DataSiswaPage() {
@@ -28,12 +28,21 @@ export default function DataSiswaPage() {
   const [targetClass, setTargetClass] = useState("");
   const [isMoving, setIsMoving] = useState(false);
 
-  // State khusus buat Modal Tambah Siswa
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newStudent, setNewStudent] = useState({ nis: "", name: "", className: "10-IPA-1" });
+  // State buat Modal Tambah
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newStudent, setNewStudent] = useState({ nis: "", name: "", className: "VII A" });
 
-  const classOptions = ["Semua", "VII A", "VII B", "VII C", "VII D", "VIII A", "VIII B", "VIII C", "VIII D", "IX A", "IX B", "IX C", "IX D"];
-  const inputClassOptions = classOptions.filter(c => c !== "Semua"); // Buat form input nggak ada opsi "Semua"
+  // State buat Modal Edit (CRUD - Update)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+
+  const classOptions = [
+    "Semua", 
+    "VII A", "VII B", "VII C", "VII D", 
+    "VIII A", "VIII B", "VIII C", "VIII D", 
+    "IX A", "IX B", "IX C", "IX D"
+  ];
+  const inputClassOptions = classOptions.filter(c => c !== "Semua");
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
@@ -81,24 +90,46 @@ export default function DataSiswaPage() {
     }
   };
 
-  // Fungsi Action Tambah Siswa Baru
+  // CRUD: CREATE
   const handleAddStudent = (e: React.FormEvent) => {
-    e.preventDefault(); // Biar halaman nggak me-refresh
-    
-    if (!newStudent.nis || !newStudent.name) {
-      return alert("NIS dan Nama wajib diisi bro!");
-    }
-
-    // Bikin ID unik ala kadarnya buat prototype
+    e.preventDefault();
+    if (!newStudent.nis || !newStudent.name) return alert("NIS dan Nama wajib diisi bro!");
     const newId = Math.random().toString(36).substr(2, 9);
-    
-    // Tambahin data baru ke daftar yang udah ada
     setStudents([...students, { id: newId, ...newStudent }]);
-    
-    // Reset form dan tutup modal
-    setNewStudent({ nis: "", name: "", className: "10-IPA-1" });
-    setIsModalOpen(false);
+    setNewStudent({ nis: "", name: "", className: "VII A" });
+    setIsAddModalOpen(false);
     alert("Siswa baru berhasil ditambahkan!");
+  };
+
+  // CRUD: DELETE
+  const handleDeleteStudent = (id: string, name: string) => {
+    // Fitur Konfirmasi biar aman
+    const isConfirm = window.confirm(`Yakin mau menghapus data siswa bernama ${name}?`);
+    if (isConfirm) {
+      setStudents(students.filter(student => student.id !== id));
+      // Hapus centang kalau siswanya lagi dicentang
+      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
+    }
+  };
+
+  // Buka Modal Edit
+  const openEditModal = (student: Student) => {
+    setEditingStudent(student);
+    setIsEditModalOpen(true);
+  };
+
+  // CRUD: UPDATE
+  const handleUpdateStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStudent) return;
+    
+    setStudents(students.map(student => 
+      student.id === editingStudent.id ? editingStudent : student
+    ));
+    
+    setIsEditModalOpen(false);
+    setEditingStudent(null);
+    alert("Data siswa berhasil diperbarui!");
   };
 
   return (
@@ -115,10 +146,8 @@ export default function DataSiswaPage() {
             <p className="text-slate-500 font-medium mt-1">Kelola database siswa dan mutasi kelas.</p>
           </div>
         </div>
-        
-        {/* Tombol Buka Modal */}
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsAddModalOpen(true)}
           className="flex items-center gap-2 bg-[#115e3b] hover:bg-[#0d4a2e] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm"
         >
           <Plus className="h-5 w-5" /> Tambah Siswa
@@ -189,6 +218,7 @@ export default function DataSiswaPage() {
                 <th className="p-4 font-bold text-sm text-slate-700 uppercase tracking-wider">NIS</th>
                 <th className="p-4 font-bold text-sm text-slate-700 uppercase tracking-wider">Nama Peserta Didik</th>
                 <th className="p-4 font-bold text-sm text-slate-700 uppercase tracking-wider">Kelas Saat Ini</th>
+                <th className="p-4 font-bold text-sm text-slate-700 uppercase tracking-wider text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -210,11 +240,29 @@ export default function DataSiswaPage() {
                         {student.className}
                       </span>
                     </td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => openEditModal(student)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit Siswa"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteStudent(student.id, student.name)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Hapus Siswa"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-slate-500 font-medium">
+                  <td colSpan={5} className="p-8 text-center text-slate-500 font-medium">
                     Tidak ada data siswa yang ditemukan.
                   </td>
                 </tr>
@@ -224,20 +272,16 @@ export default function DataSiswaPage() {
         </div>
       </div>
 
-      {/* MODAL / POP-UP TAMBAH SISWA */}
-      {isModalOpen && (
+      {/* MODAL TAMBAH SISWA */}
+      {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            
-            {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
               <h2 className="text-lg font-extrabold text-slate-800">Tambah Peserta Didik Baru</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors">
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
-
-            {/* Modal Body / Form */}
             <form onSubmit={handleAddStudent} className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">Nomor Induk Siswa (NIS)</label>
@@ -271,22 +315,59 @@ export default function DataSiswaPage() {
                   {inputClassOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
               </div>
-
-              {/* Modal Footer / Buttons */}
               <div className="flex items-center justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button type="submit" className="px-5 py-2.5 text-sm font-bold text-white bg-[#115e3b] hover:bg-[#0d4a2e] rounded-xl transition-colors shadow-sm">Simpan Data</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDIT SISWA */}
+      {isEditModalOpen && editingStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <h2 className="text-lg font-extrabold text-slate-800">Edit Data Peserta Didik</h2>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateStudent} className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Nomor Induk Siswa (NIS)</label>
+                <input 
+                  type="text" 
+                  value={editingStudent.nis}
+                  onChange={(e) => setEditingStudent({...editingStudent, nis: e.target.value})}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                <input 
+                  type="text" 
+                  value={editingStudent.name}
+                  onChange={(e) => setEditingStudent({...editingStudent, name: e.target.value})}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Penempatan Kelas</label>
+                <select 
+                  value={editingStudent.className}
+                  onChange={(e) => setEditingStudent({...editingStudent, className: e.target.value})}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
                 >
-                  Batal
-                </button>
-                <button 
-                  type="submit"
-                  className="px-5 py-2.5 text-sm font-bold text-white bg-[#115e3b] hover:bg-[#0d4a2e] rounded-xl transition-colors shadow-sm"
-                >
-                  Simpan Data
-                </button>
+                  {inputClassOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                <button type="submit" className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm">Update Data</button>
               </div>
             </form>
           </div>
