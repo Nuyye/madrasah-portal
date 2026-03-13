@@ -40,7 +40,7 @@ export const MadrasahAPI = {
   },
 
   // 4. Fungsi khusus buat ngirim data REKAP BULANAN mateng (lengkap sama hasil konversi)
-  submitRekapAbsensi: async (dataRekap: Record<string, string | number>[]) => {
+  submitRekapAbsensi: async (dataRekap: Record<string, unknown>) => {
     /* NANTI TEMEN LO TINGGAL UNCOMMENT CODE INI:
       const response = await fetch(`${API_URL}/rekap-absensi`, {
         method: "POST",
