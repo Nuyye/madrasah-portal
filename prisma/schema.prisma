@@ -45,7 +45,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?   
-  nip           Int?
+  nip           String?
   role          Role    @default(GUEST) 
   
   accounts      Account[]

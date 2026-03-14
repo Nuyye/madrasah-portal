@@ -6,11 +6,11 @@ import bcryptjs from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { LoginSchema, RegisterSchema } from "../schemas/authSchema";
-import { AuthTypes } from "../types/auth";
+import { revalidatePath } from "next/cache";
 
-export const LoginAction = async (data: AuthTypes) => {
+export const LoginAction = async (data: FormData) => {
   try {
-    const validate = LoginSchema.safeParse(data);
+    const validate = LoginSchema.safeParse(Object.fromEntries(data));
 
     if (!validate.success) {
       return {
@@ -59,9 +59,9 @@ export const LoginAction = async (data: AuthTypes) => {
   }
 };
 
-export const RegisterAction = async (data: AuthTypes) => {
+export const RegisterAction = async (data: FormData) => {
   try {
-    const vaidate = RegisterSchema.safeParse(data);
+    const vaidate = RegisterSchema.safeParse(Object.fromEntries(data));
 
     if (!vaidate.success) {
       return {
@@ -90,9 +90,11 @@ export const RegisterAction = async (data: AuthTypes) => {
         name,
         email,
         password: hashedPassword,
-        nip: nip,
+        nip,
       },
     });
+
+    revalidatePath("/", "layout");
 
     return {
       success: true,
