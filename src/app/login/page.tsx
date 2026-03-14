@@ -23,7 +23,7 @@ export default function AuthPage() {
     email: "",
     password: "",
     name: "",
-    nip: 0,
+    nip: "",
   });
 
   const router = useRouter();
@@ -40,31 +40,44 @@ export default function AuthPage() {
     e.preventDefault();
 
     try {
-      const result = isLogin
-        ? await LoginAction(formData)
-        : await RegisterAction(formData);
-
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-
-      // Reset Form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        nip: 0,
-      });
-
-      toast.success(result.message);
-
       if (isLogin) {
-        router.push("/portal");
+        const LoginProcess = LoginAction(
+          new FormData(e.currentTarget as HTMLFormElement),
+        ).then((res) => {
+          if (!res.success) throw new Error(res.message);
+
+          router.push("/");
+
+          return res;
+        });
+
+        toast.promise(LoginProcess, {
+          loading: "Sedang login...",
+          success: (res) => res.message,
+          error: (err) => err.message || "Gagal login, coba lagi!",
+        });
       } else {
-        router.refresh();
+        const RegisterProcess = RegisterAction(
+          new FormData(e.currentTarget as HTMLFormElement),
+        ).then((res) => {
+          if (!res.success) throw new Error(res.message);
+
+          setFormData((prev) => ({ ...prev, password: "" }));
+          setIsLogin(true);
+          return res;
+        });
+        toast.promise(RegisterProcess, {
+          loading: "Memproses pendaftaran...",
+          success: (res) => res.message,
+          error: (err) => err.message || "Gagal daftar, coba lagi!",
+        });
       }
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan, coba lagi!",
+      );
     }
   };
 

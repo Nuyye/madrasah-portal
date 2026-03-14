@@ -9,5 +9,5 @@ export const RegisterSchema = z.object({
   name: z.string(),
   email: z.string().email("Email tidak valid"),
   password: z.string().min(8, "Password minimal 8 karakter"),
-  nip: z.number(),
+  nip: z.string(),
 });
