@@ -1,23 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { LayoutDashboard, CalendarCheck, Users, ShieldAlert, Settings, LogOut } from "lucide-react";
+// 1. Import fungsi sakti dari Auth.js buatan Ruspian 🔥
+import { signOut } from "next-auth/react"; 
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter(); // Buat fungsi pindah halaman
 
   const isActive = (path: string) => pathname === path;
 
-  // 🧹 Fungsi Sapu Jagat Logout
-  const handleLogout = () => {
-    // 1. Hapus semua kemungkinan cookie yang ditahan sama Middleware
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
-    // 2. Tendang balik ke halaman Login
-    router.replace("/login");
+  // 2. Ganti Fungsi Logout Barbar Semalem Pake Ini
+  const handleLogout = async () => {
+    // Fungsi ini bakal otomatis ngapus semua cookie dan lempar lo ke halaman login!
+    await signOut({ callbackUrl: '/login' }); 
   };
 
   return (
