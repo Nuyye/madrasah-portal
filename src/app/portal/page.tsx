@@ -1,6 +1,7 @@
 "use client";
 
-import { Users, BookOpen, ShieldAlert, TrendingUp, Calendar, ArrowRight, Activity } from "lucide-react";
+import GrafikKehadiran from "../../components/GrafikKehadiran";
+import { Users, BookOpen, ShieldAlert, Calendar, ArrowRight, Activity } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -9,14 +10,6 @@ export default function DashboardPage() {
     { title: "Total Peserta Didik", value: "142", icon: Users, color: "text-blue-600", bg: "bg-blue-100" },
     { title: "Kelas Aktif", value: "12", icon: BookOpen, color: "text-emerald-600", bg: "bg-emerald-100" },
     { title: "Siswa Dalam Pembinaan", value: "3", icon: ShieldAlert, color: "text-red-600", bg: "bg-red-100" },
-  ];
-
-  // Data Dummy Grafik Mingguan (Persentase Kehadiran)
-  const chartData = [
-    { minggu: "Mg 1", hadir: 95, sakit: 3, alpha: 2 },
-    { minggu: "Mg 2", hadir: 92, sakit: 5, alpha: 3 },
-    { minggu: "Mg 3", hadir: 88, sakit: 4, alpha: 8 },
-    { minggu: "Mg 4", hadir: 96, sakit: 2, alpha: 2 },
   ];
 
   return (
@@ -53,45 +46,15 @@ export default function DashboardPage() {
         })}
       </div>
 
+      {/* 📈 Area Grafik & Menu Cepat (Dibagi 3 Kolom) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* 📈 Grafik Kehadiran Bulan Ini (Murni CSS Tailwind) */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-[#115e3b]" /> Tren Kehadiran Siswa
-              </h2>
-              <p className="text-sm text-slate-500 font-medium">Bulan Februari 2026</p>
-            </div>
-            <div className="flex gap-3 text-xs font-bold">
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-[#115e3b]"></div> Hadir</span>
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-amber-400"></div> Sakit/Izin</span>
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div> Alpha</span>
-            </div>
-          </div>
-
-          {/* Area Grafik CSS */}
-          <div className="flex-1 flex items-end justify-between gap-2 h-48 mt-4">
-            {chartData.map((data, i) => (
-              <div key={i} className="flex flex-col items-center flex-1 gap-2 group">
-                <div className="w-full flex justify-center items-end h-full gap-1">
-                  {/* Bar Hadir */}
-                  <div className="w-1/3 bg-[#115e3b] rounded-t-sm relative transition-all duration-500 group-hover:opacity-80" style={{ height: `${data.hadir}%` }}>
-                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">{data.hadir}%</span>
-                  </div>
-                  {/* Bar Sakit */}
-                  <div className="w-1/3 bg-amber-400 rounded-t-sm relative transition-all duration-500 group-hover:opacity-80" style={{ height: `${data.sakit * 5}%` }}></div>
-                  {/* Bar Alpha */}
-                  <div className="w-1/3 bg-red-500 rounded-t-sm relative transition-all duration-500 group-hover:opacity-80" style={{ height: `${data.alpha * 5}%` }}></div>
-                </div>
-                <span className="text-xs font-bold text-slate-600 border-t border-slate-100 w-full text-center pt-2">{data.minggu}</span>
-              </div>
-            ))}
-          </div>
+        {/* Kolom Grafik (Makan 2 Kolom) */}
+        <div className="lg:col-span-2">
+          <GrafikKehadiran />
         </div>
 
-        {/* 🚀 Menu Cepat (Quick Actions) */}
+        {/* 🚀 Kolom Menu Cepat (Quick Actions) (Makan 1 Kolom) */}
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
           <h2 className="text-lg font-extrabold text-slate-800 flex items-center gap-2 mb-6">
             <Activity className="h-5 w-5 text-[#115e3b]" /> Akses Cepat
@@ -100,7 +63,9 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-3 flex-1">
             <Link href="/portal/absensi" className="p-4 rounded-xl border border-slate-100 hover:border-emerald-500 hover:bg-emerald-50 flex items-center justify-between group transition-all">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-100 text-[#115e3b] rounded-lg group-hover:bg-[#115e3b] group-hover:text-white transition-colors"><Calendar className="h-5 w-5" /></div>
+                <div className="p-2 bg-emerald-100 text-[#115e3b] rounded-lg group-hover:bg-[#115e3b] group-hover:text-white transition-colors">
+                  <Calendar className="h-5 w-5" />
+                </div>
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">Input Absen Baru</h3>
                   <p className="text-xs text-slate-500">Rekap mingguan kelas</p>
@@ -111,7 +76,9 @@ export default function DashboardPage() {
 
             <Link href="/portal/pembinaan" className="p-4 rounded-xl border border-slate-100 hover:border-red-500 hover:bg-red-50 flex items-center justify-between group transition-all">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-100 text-red-600 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors"><ShieldAlert className="h-5 w-5" /></div>
+                <div className="p-2 bg-red-100 text-red-600 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors">
+                  <ShieldAlert className="h-5 w-5" />
+                </div>
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">Cetak Surat Peringatan</h3>
                   <p className="text-xs text-slate-500">Siswa alpha &ge; 3</p>
@@ -122,7 +89,9 @@ export default function DashboardPage() {
 
              <Link href="/portal/siswa" className="p-4 rounded-xl border border-slate-100 hover:border-blue-500 hover:bg-blue-50 flex items-center justify-between group transition-all">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors"><Users className="h-5 w-5" /></div>
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <Users className="h-5 w-5" />
+                </div>
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">Kelola Data Siswa</h3>
                   <p className="text-xs text-slate-500">Mutasi &amp; Master Data</p>

@@ -46,7 +46,7 @@ export default function AuthPage() {
         ).then((res) => {
           if (!res.success) throw new Error(res.message);
 
-          router.push("/");
+          router.push("/portal");
 
           return res;
         });
