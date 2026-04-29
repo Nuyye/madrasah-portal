@@ -63,3 +63,43 @@ enum Role {
   WALI
   ADMIN
 }
+
+// --- TAMBAHAN BARU: DATA SISWA & ABSENSI ---
+
+model Siswa {
+  id        String    @id @default(cuid())
+  nisn      String?   @unique
+  nama      String
+  kelas     String?   // Contoh: "VII-A", "VIII-B"
+  
+  // Relasi: Satu siswa bisa punya banyak data absensi
+  absensi   Absensi[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Absensi {
+  id          String   @id @default(cuid())
+  siswaId     String
+  tanggal     DateTime @default(now()) // Tanggal absen diinput
+  mingguKe    Int?     // Nyimpen data Minggu ke-1, 2, 3, dst
+  bulan       String?  // Nyimpen data bulan (Januari, Februari, dll)
+  status      StatusKehadiran
+  keterangan  String?  @db.Text // Alasan sakit/izin kalau ada
+
+  // Relasi nyambungin ke tabel Siswa
+  siswa       Siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Pilihan status absensi (Biar datanya seragam & gampang dihitung)
+enum StatusKehadiran {
+  HADIR
+  SAKIT
+  IZIN
+  ALPHA
+  BOLOS
+}
