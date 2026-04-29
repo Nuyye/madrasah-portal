@@ -1,4 +1,9 @@
 import { PrismaClient } from '@prisma/client'
+import * as dotenv from 'dotenv'
+
+// Paksa ts-node buat baca alamat database dari file rahasia
+dotenv.config()
+dotenv.config({ path: '.env.local' })
 
 const prisma = new PrismaClient()
 
