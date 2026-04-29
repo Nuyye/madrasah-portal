@@ -5,13 +5,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       
-      {/* Sidebar Desktop: Disembunyiin di HP (hidden), dimunculin di tablet ke atas (md:block) */}
-      <div className="hidden md:block w-64 flex-shrink-0">
-        <Sidebar />
-      </div>
+      {/* Sidebar dibiarin lepas tanpa bungkus, karena dia udah bisa ngatur ukurannya sendiri dari dalem */}
+      <Sidebar />
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
